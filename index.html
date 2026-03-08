@@ -854,7 +854,8 @@ body {
 
     <div id="hsList">Lade...</div>
 
-    <div style="margin-top:14px">
+    <div style="margin-top:14px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <button class="iconBtn" onclick="loadHS()">🔄 Aktualisieren</button>
       <button class="iconBtn" onclick="closeHighscore()">Schließen</button>
     </div>
   </div>
@@ -1874,8 +1875,12 @@ const MODULE_LABELS = {
 
 function openHighscore() {
   document.getElementById('highscoreOverlay').classList.add('open');
-  // Speichern-Zeile nur zeigen wenn Modul gespielt aber noch nicht gespeichert
-  document.getElementById('saveRow').style.display = (curModule && !scoreSaved) ? 'flex' : 'none';
+  // Direkt auf Tab des aktuellen Moduls springen
+  if (curModule) {
+    switchTab(curModule);
+  } else {
+    switchTab('alle');
+  }
   loadHS();
 }
 
@@ -1958,16 +1963,14 @@ function renderHS() {
 function saveScore() {
   if (scoreSaved || !playerName) return;
   scoreSaved = true;
-  const pts  = correct * 10;
+  const pts  = correct;
   const icon = MODULES[curModule]?.icon || '';
   fetch(SCRIPT_URL, {
     method: 'POST',
     body: JSON.stringify({ name: playerName + ' [' + icon + ']', score: pts })
   });
-  document.getElementById('saveBtn').textContent = '✔ Gespeichert!';
-  document.getElementById('saveBtn').disabled = true;
-  document.getElementById('saveRow').style.display = 'none';
-  setTimeout(() => { switchTab(curModule); loadHS(); }, 1000);
+  // 2 Sekunden warten damit Google Sheets den Eintrag verarbeiten kann
+  setTimeout(() => loadHS(), 2000);
 }
 
 // ═══════════════════════════════════════════════════════════
